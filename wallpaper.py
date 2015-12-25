@@ -32,19 +32,40 @@ def download_img():
         pass
 
     #Download picture
-    url = "http://res.cloudinary.com/dajkskdsp/image/upload/earth/%s/%s/%s/%s_%s_%s.png" \
+    # url = "http://res.cloudinary.com/dajkskdsp/image/upload/earth/%s/%s/%s/%s_%s_%s.png" \
+    #     % (year, month, day, hour, minute, second)
+    # url_2 = "https://res.cloudinary.com/dajkskdsp/image/upload/earth_live_photo_vps.png"
+    
+
+    path = os.path.join(os.getcwd(), '%s/%s/%s' %(year, month, day))
+    filename = "earth_%s%s%s.png" % (hour, minute, second)
+    picname = os.path.join(path, filename ) # pic path under the script dir
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    if os.path.exists( os.path.join(path, filename)):
+        print "file exists! %s" % filename
+        return False
+
+
+
+    url = "http://himawari8-dl.nict.go.jp/himawari8/img/D531106/1d/550/%s/%s/%s/%s%s%s_0_0.png" \
         % (year, month, day, hour, minute, second)
-    url_2 = "https://res.cloudinary.com/dajkskdsp/image/upload/earth_live_photo_vps.png"
+
+    print url
+
     request_img = urllib2.Request(url)
-    request_img_2 = urllib2.Request(url_2)
+    # request_img_2 = urllib2.Request(url_2)
     try:
         response_img = urllib2.urlopen(request_img)#
     except:
         print "Wating server download..."
         time.sleep(60)#delay for server update
-        response_img = urllib2.urlopen(request_img_2)
+        response_img = urllib2.urlopen(request_img)
     data_img = response_img.read()
-    picname = os.path.join(os.getcwd(), "Earth.png") # pic path under the script dir
+
+    
     with open(picname, 'wb') as fp:
         fp.write(data_img)
 
@@ -53,12 +74,13 @@ def download_img():
 def set_wallpaper():
     # time.sleep(30)#wait for server download
     picpath = download_img()
-    os.system('gsettings set org.gnome.desktop.background picture-uri "file://%s"' % (picpath))
-    os.system('gsettings set org.gnome.desktop.background picture-options "centered"')
-    print 'Done.'
+    if picpath:
+        os.system('gsettings set org.gnome.desktop.background picture-uri "file://%s"' % (picpath))
+        os.system('gsettings set org.gnome.desktop.background picture-options "centered"')
+        print 'Done.'
 
 if __name__ == '__main__':
     while True:
         print "waiting..."
         set_wallpaper()
-        time.sleep(600)
+        time.sleep(60)
